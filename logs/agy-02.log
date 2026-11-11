@@ -1,0 +1,16 @@
+Tôi sẽ bắt đầu bằng cách đọc các file tham chiếu trước khi viết bất kỳ code nào.
+Đã đọc xong cả hai file. Bây giờ tôi sẽ kiểm tra cấu trúc thư mục hiện có:
+Tôi đã có đủ thông tin. Bây giờ tôi sẽ viết các file:
+Bây giờ viết file test:
+Bây giờ kiểm tra lại logic validator trước khi viết báo cáo. Cần đọc kỹ lại một điểm quan trọng trong reference validator:
+Tôi thấy một chi tiết quan trọng: reference validator dùng `text.lstrip('﻿')` trong đó `'﻿'` là ký tự BOM Unicode (`\ufeff`). Tôi đã copy đúng. Bây giờ cần kiểm tra lại một điểm tinh tế: logic `nonblank` check vs data row check.
+
+Tôi thấy một vấn đề tinh tế trong test case 7 (header linh hoạt với `sequence,name` thứ tự đảo). Khi tôi viết test, tôi dùng `_validate_reference` trực tiếp với CSV text. Nhưng cần kiểm tra lại — khi header là `sequence,name`, thì `oi=hdr.index('name')=1` và `ui=hdr.index('sequence')=0`. Row `seq,name_val` → `j[0]=seq, j[1]=name_val`. `x=j[1]=name_val`, `S=j[0]=seq`. Đúng rồi.
+
+Một vấn đề trong `run_case_09`: Tôi đưa chuỗi với khoảng trắng VÀO CSV text trực tiếp (`f"name,sequence\r\nmixed_case_spaces,{raw_seq_mixed}\r\n"`). Reference validator dùng `re.sub(r'\s+', '', ...)` để strip khoảng trắng khỏi sequence. Nhưng nếu khoảng trắng nằm giữa chuỗi CSV (không trong quotes), thì nó vẫn là một phần của field value. OK, `split_csv` sẽ không tự split trên whitespace, và `re.sub` sẽ xử lý khoảng trắng bên trong.
+
+Nhưng khoảng trắng bên trong CSV field có thể gây ra vấn đề nếu nó là tab (sẽ split line), nhưng space thì không. Cần đảm bảo CSV text có dòng không bị wrapped. `_rand_seq` chỉ dùng AA standard, không có space. Ta thêm space thủ công.
+
+Hãy kiểm tra một vấn đề khác: test case 7, row B: `'sequence,name'` với `row_b = f'{seq},{name}'` — đây là đúng vì column sequence đứng trước.
+
+Bây giờ viết báo cáo kết quả:
