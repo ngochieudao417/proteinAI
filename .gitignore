@@ -1,0 +1,8 @@
+# Colab/runtime artifacts
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+# weights never belong in git (25GB, lives on Drive)
+weights/
+*.safetensors
+*.pt
