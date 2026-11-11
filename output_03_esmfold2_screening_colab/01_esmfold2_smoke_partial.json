@@ -1,0 +1,365 @@
+{
+  "notebook": "01_esmfold2_smoke_test",
+  "schema": 1,
+  "started_utc": "2026-11-11T05:18:17Z",
+  "env": {
+    "python": "3.13.16",
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+    "torch_version": "2.14.1+cu130",
+    "gpu": "NVIDIA L4",
+    "compute_capability": [
+      8,
+      9
+    ],
+    "vram_total_gb": 22.03,
+    "vram_free_gb": 21.84,
+    "alloc_conf": "expandable_segments:True",
+    "drive_free_gb": 106.9,
+    "content_free_gb": 112.5,
+    "cpu_count": 12,
+    "ram_total_gb": 53.0
+  },
+  "knobs": {
+    "esmc_precision": "fp8",
+    "model_dtype": "bfloat16",
+    "gate_num_loops": 20,
+    "gate_num_sampling_steps": 200,
+    "probe_num_loops": 4,
+    "probe_num_sampling_steps": 20,
+    "lm_dropout": 0.3,
+    "msa_max_depth": 1024,
+    "msa_column_mask_rate": 0.1,
+    "hard_cap_min": 110,
+    "stage_to_local": true,
+    "alloc_conf": "expandable_segments:True"
+  },
+  "steps": {
+    "install": {
+      "seconds": 17.6,
+      "esm_version": "3.4.3",
+      "torch_before": "2.14.1+cu130",
+      "torch_after": "2.14.1+cu130",
+      "esmfold2_hf_repo": "biohub/ESMFold2"
+    },
+    "weights": {
+      "cache_dir_drive": "/content/drive/MyDrive/proteinAI/weights/ESMFold2",
+      "model_dir_used": "/content/esmfold2_weights",
+      "cache_hit": false,
+      "download_seconds": 230.8,
+      "download_gb": 24.901,
+      "stage_to_local_seconds": 127.9,
+      "manifest_total_gb": 24.901,
+      "files_verified": 9
+    },
+    "load_model": {
+      "seconds": 105.7,
+      "ccd_load_seconds": 8.3,
+      "kernel_backend_effective": "fused",
+      "vram_weights_gb": 6.413,
+      "vram_peak_during_load_gb": 6.414,
+      "vram_reserved_gb": 6.42,
+      "vram_free_after_load_gb": 15.396,
+      "ram_rss_gb": 9.367668151855469,
+      "n_params": 266656029,
+      "n_buffer_elements": 6346017830,
+      "trunk_dtype": "torch.bfloat16",
+      "config_num_loops": 20,
+      "msa_encoder_present": true,
+      "offload_esmc_flag_present": true
+    },
+    "sequences": {
+      "il7ra_len": 219,
+      "tl1a_len": 180,
+      "binder_pos": "SVIEKLRKLEKQARKQGDEVLVMLARMVLEYLEKGWVSEEDADESADRIEEVLKK",
+      "binder_pos_source": "PDB 7S5B / 7OPB chain D-F, Cao et al. Nature 2022",
+      "binder_neg": "KLSKWIVRELAERRMDKEELVVRAEEVEVQVLGSAKDLEEGDYIKQKSALEKMDL",
+      "binder_neg_rule": "random.Random(20261111).shuffle of binder_pos",
+      "binder_100_len": 100,
+      "main_complex_total_residues": 274
+    },
+    "msa": {
+      "source": "query_only_FALLBACK",
+      "a3m_path": "/content/drive/MyDrive/proteinAI/data/msa/IL7Ra_query_only.a3m",
+      "depth": 1,
+      "match_columns": 219,
+      "query_matches_target": true,
+      "msa_depth_realistic": false,
+      "fetch_info": {},
+      "note": "a3m ch\u1ec9 c\u00f3 query: CH\u1ec8 ch\u1ee9ng minh code path, KH\u00d4NG ph\u1ea3i c\u1ea5u h\u00ecnh c\u1eeda s\u00e0ng"
+    },
+    "ipsae_adapter": {
+      "ipsae_py": "/content/drive/MyDrive/proteinAI/data/ipsae.py",
+      "ipsae_sha256": "10cf9b08c68c91e06cb28526cf2026f47a3980c9048fd3226d13e3304eaf1c27",
+      "ipsae_url": "https://raw.githubusercontent.com/DunbrackLab/IPSAE/main/ipsae.py",
+      "pae_cutoff": 10,
+      "dist_cutoff": 10,
+      "path": "AF2 (.pdb + .json with pae/plddt/iptm/ptm)",
+      "pdb_written_in": "model token order (so PAE needs no permutation when identity holds)"
+    },
+    "control_check": {
+      "ipsae_min_positive": null,
+      "ipsae_min_negative": null,
+      "discriminates": null
+    },
+    "ceiling": {
+      "largest_ok": null,
+      "first_oom_total_residues": null,
+      "tl1a_trimer_plus_binder_feasible": false,
+      "probe_settings": {
+        "num_loops": 4,
+        "num_sampling_steps": 20
+      },
+      "note": "VRAM peak coi nh\u01b0 \u0111\u1ed9c l\u1eadp v\u1edbi num_loops/num_sampling_steps (ch\u00fang tu\u1ea7n t\u1ef1, t\u00e1i d\u00f9ng b\u1ed9 nh\u1edb)"
+    }
+  },
+  "folds": [
+    {
+      "tag": "A_gate_msa",
+      "total_residues": 274,
+      "chains": [
+        {
+          "id": "A",
+          "len": 219,
+          "msa_depth": 1
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "msa_depth": 0
+        }
+      ],
+      "num_loops": 20,
+      "num_sampling_steps": 200,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "msa_max_depth": 1024,
+      "msa_column_mask_rate": 0.1,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "ok": false,
+      "token_order": {
+        "n_tokens": 274,
+        "n_residues_out": 274,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          219,
+          55
+        ]
+      },
+      "wall_seconds": 26.8,
+      "vram_baseline_gb": 6.413,
+      "vram_peak_gb": 7.611,
+      "vram_peak_reserved_gb": 7.635,
+      "vram_activation_gb": 1.198,
+      "oom": false,
+      "error": "RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16"
+    },
+    {
+      "tag": "B_nomsa",
+      "total_residues": 274,
+      "chains": [
+        {
+          "id": "A",
+          "len": 219,
+          "msa_depth": 0
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "msa_depth": 0
+        }
+      ],
+      "num_loops": 20,
+      "num_sampling_steps": 200,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "msa_max_depth": 1024,
+      "msa_column_mask_rate": 0.1,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "ok": false,
+      "token_order": {
+        "n_tokens": 274,
+        "n_residues_out": 274,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          219,
+          55
+        ]
+      },
+      "wall_seconds": 15.0,
+      "vram_baseline_gb": 6.423,
+      "vram_peak_gb": 7.611,
+      "vram_peak_reserved_gb": 7.637,
+      "vram_activation_gb": 1.188,
+      "oom": false,
+      "error": "RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16"
+    },
+    {
+      "tag": "C_neg_msa",
+      "total_residues": 274,
+      "chains": [
+        {
+          "id": "A",
+          "len": 219,
+          "msa_depth": 1
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "msa_depth": 0
+        }
+      ],
+      "num_loops": 20,
+      "num_sampling_steps": 200,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "msa_max_depth": 1024,
+      "msa_column_mask_rate": 0.1,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "ok": false,
+      "token_order": {
+        "n_tokens": 274,
+        "n_residues_out": 274,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          219,
+          55
+        ]
+      },
+      "wall_seconds": 15.0,
+      "vram_baseline_gb": 6.423,
+      "vram_peak_gb": 7.611,
+      "vram_peak_reserved_gb": 7.637,
+      "vram_activation_gb": 1.188,
+      "oom": false,
+      "error": "RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16"
+    }
+  ],
+  "ceiling_probe": [
+    {
+      "tag": "P_tl1a1x180_b55_235aa_try0",
+      "total_residues": 235,
+      "chains": [
+        {
+          "id": "A",
+          "len": 180,
+          "msa_depth": 0
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "msa_depth": 0
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 20,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "msa_max_depth": 1024,
+      "msa_column_mask_rate": 0.1,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "ok": false,
+      "token_order": {
+        "n_tokens": 235,
+        "n_residues_out": 235,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          180,
+          55
+        ]
+      },
+      "wall_seconds": 3.3,
+      "vram_baseline_gb": 6.423,
+      "vram_peak_gb": 7.298,
+      "vram_peak_reserved_gb": 7.33,
+      "vram_activation_gb": 0.875,
+      "oom": false,
+      "error": "RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16",
+      "probe_n_protomers": 1,
+      "probe_binder_len": 55
+    },
+    {
+      "tag": "P_tl1a1x180_b100_280aa_try0",
+      "total_residues": 280,
+      "chains": [
+        {
+          "id": "A",
+          "len": 180,
+          "msa_depth": 0
+        },
+        {
+          "id": "B",
+          "len": 100,
+          "msa_depth": 0
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 20,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "msa_max_depth": 1024,
+      "msa_column_mask_rate": 0.1,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "ok": false,
+      "token_order": {
+        "n_tokens": 280,
+        "n_residues_out": 280,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          180,
+          100
+        ]
+      },
+      "wall_seconds": 6.6,
+      "vram_baseline_gb": 6.423,
+      "vram_peak_gb": 7.664,
+      "vram_peak_reserved_gb": 7.695,
+      "vram_activation_gb": 1.241,
+      "oom": false,
+      "error": "RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16",
+      "probe_n_protomers": 1,
+      "probe_binder_len": 100
+    }
+  ],
+  "errors": [],
+  "manual_fill": {
+    "compute_units_remaining_before_run": "<<\u0110I\u1ec0N TAY>>",
+    "compute_units_remaining_after_run": "<<\u0110I\u1ec0N TAY>>"
+  },
+  "elapsed_min": 14.63,
+  "cu_estimate": 1.17
+}

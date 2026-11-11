@@ -1,0 +1,4 @@
+rank,name,target,length,screen_verdict,ipsae_binder,ipsae_min,iptm,ptm,plddt_mean,novelty_verdict,max_identity_pct,coverage_ours_pct,worst_hit_id,fold_seconds,vram_peak_gb,error
+1,ctrl_pos_7S5B_IL7Ra,IL7RA,55,PASS,0.772791,0.74884,0.9374,0.8728,87.86,PASS,0.0,0.0,NO_DB,35.6,8.27,
+2,probe_dcr3_TL1A,TL1A,176,PASS,0.561002,0.343129,0.8009,0.8166,79.57,PASS,0.0,0.0,NO_DB,196.6,15.71,
+3,ctrl_neg_scrambled_IL7Ra,IL7RA,55,REVIEW,0.0,0.0,0.2071,0.7224,78.22,PASS,0.0,0.0,NO_DB,22.2,8.27,

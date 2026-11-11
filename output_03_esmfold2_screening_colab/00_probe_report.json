@@ -1,0 +1,40 @@
+{
+  "gpu": "NVIDIA L4, 23034 MiB, 22564 MiB, 580.82.07, 8.9",
+  "cpu_count": 12,
+  "ram": "total        used        free      shared  buff/cache   available\nMem:              52           1          48           0           3          51",
+  "disk_free_gb": 112.5,
+  "python": "3.13.16",
+  "nvcc": "Cuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0",
+  "torch": "2.14.1+cu130",
+  "torch_cuda": "13.0",
+  "cuda_avail": true,
+  "gpu_name": "NVIDIA L4",
+  "gpu_vram_gb": 22.0,
+  "jax": "0.11.1",
+  "jax_devices": "[CudaDevice(id=0)]",
+  "drive_free_gb": 106.9,
+  "drive_total_gb": 112.6,
+  "drive_write_mbps": 207.9,
+  "bench_tflops": {
+    "fp32": 8.3,
+    "fp16": 11.5,
+    "bf16": 13.6
+  },
+  "vram_allocatable_gb": 21.5,
+  "net": {
+    "github.com": "200 0.057768s",
+    "huggingface.co": "200 0.047148s",
+    "hf CDN (cdn-lfs)": "000 0.007322s",
+    "RFdiffusion weights (IPD)": "403 0.688456s",
+    "RCSB files": "200 0.508546s",
+    "UniProt REST": "403 0.706108s",
+    "colabfold MSA server": "404 0.679165s",
+    "storage.googleapis": "400 0.046556s"
+  },
+  "_notebook": "00_probe_env",
+  "_timestamp": "2026-11-11T04:48:59",
+  "_dien_tay": {
+    "compute_unit_con_lai": "<<ĐIỀN TAY>>",
+    "colab_tier": "<<ĐIỀN TAY: Pro hay Pro+>>"
+  }
+}

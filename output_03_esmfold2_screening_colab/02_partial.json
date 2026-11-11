@@ -1,0 +1,1669 @@
+{
+  "notebook": "02_dtype_fix_and_measure",
+  "schema": 1,
+  "started_utc": "2026-11-11T07:05:32Z",
+  "env": {
+    "python": "3.13.16",
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+    "torch_version": "2.14.1+cu130",
+    "gpu": "NVIDIA L4",
+    "compute_capability": [
+      8,
+      9
+    ],
+    "vram_total_gb": 22.03,
+    "vram_free_gb": 21.84,
+    "alloc_conf": "expandable_segments:True",
+    "drive_free_gb": 106.9,
+    "content_free_gb": 112.5,
+    "cpu_count": 12,
+    "ram_total_gb": 53.0
+  },
+  "root_cause_hypothesis": {
+    "summary": "forward() dong autocast bf16 tai model.py:1160 ngay sau `z = z.float()` (1159); distogram_head (1181) / structure_head.sample (1185) / confidence_head (1239) chay NGOAI autocast tren z fp32 => weight 3 head do PHAI la fp32. from_pretrained(dtype=torch.bfloat16) cast ca 3 head sang bf16 => 'mat1 Float, mat2 BFloat16' tai distogram_head.",
+    "implication_1": "diffusion decoder CHUA TUNG chay trong notebook 01 => moi so VRAM/time la san duoi",
+    "implication_2": "esmc_precision khong lien quan; dtype=bf16 + esmc bf16 se chet y nguyen",
+    "fix": "dtype=None (fp32). Trunk van bf16 nho autocast model.py:973 + FoldingTrunk cast noi bo layers.py:2839",
+    "why_fp32_is_complete": "InputsEmbedder tra ve torch.cat([a_bf16, aatype_fp32, profile_fp32, deletion_mean_fp32]) (layers.py:2136, model.py:936/976/977) -> type promotion lam x_inputs = fp32. x_inputs la s_inputs cua structure_head (1187) va confidence_head (1240). Vay CA HAI dau vao cua 3 head (z va x_inputs) deu fp32 co chu y => load fp32 khop hoan toan, khong con lech dtype."
+  },
+  "knobs": {
+    "model_dtype": "None",
+    "esmc_precision": "fp8",
+    "gate_num_loops": 20,
+    "gate_num_sampling_steps": 200,
+    "gate_lm_dropout": 0.3,
+    "probe_num_loops": 4,
+    "probe_num_sampling_steps": 8,
+    "mt_num_loops": 10,
+    "mt_num_sampling_steps": 50,
+    "msa_max_depth": 1024,
+    "msa_column_mask_rate": 0.1,
+    "pae_cutoff": 10,
+    "dist_cutoff": 10,
+    "hard_cap_min": 75,
+    "alloc_conf": "expandable_segments:True",
+    "stage_to_local": true
+  },
+  "open_discrepancies_vs_config_json": {
+    "num_sampling_steps": {
+      "fold_default": 200,
+      "config_json_inference_num_steps": 14,
+      "used_here": 200,
+      "must_ask_organizer": true
+    },
+    "lm_dropout": {
+      "fold_default": 0.3,
+      "config_json_lm_encoder_lm_dropout": 0.25,
+      "used_here": 0.3,
+      "stochastic": true,
+      "fold_docstring": "paper folding-eval value; 0/None disables",
+      "must_ask_organizer": true
+    }
+  },
+  "steps": {
+    "install": {
+      "esm_version": "3.4.3",
+      "torch_before": "2.14.1+cu130",
+      "torch_after": "2.14.1+cu130",
+      "seconds": 12.4
+    },
+    "weights": {
+      "model_dir_used": "/content/esmfold2_weights",
+      "downloaded_bytes": 0,
+      "files_verified": 9,
+      "manifest_total_gb": 24.901,
+      "stage_to_local_seconds": 777.4
+    },
+    "sequences": {
+      "il7ra_len": 219,
+      "tl1a_len": 180,
+      "dcr3_len": 176,
+      "binder_pos": "SVIEKLRKLEKQARKQGDEVLVMLARMVLEYLEKGWVSEEDADESADRIEEVLKK",
+      "binder_pos_source": "PDB 7S5B / 7OPB chain D-F, Cao et al. Nature 2022, picomolar, VALIDATED",
+      "binder_neg": "KLSKWIVRELAERRMDKEELVVRAEEVEVQVLGSAKDLEEGDYIKQKSALEKMDL",
+      "binder_neg_rule": "random.Random(20261111).shuffle(binder_pos)",
+      "dcr3_source": "UniProt O95407 res30-205 ectodomain approx; complex PDB 3K51; PROBE not candidate",
+      "gate_complex_residues": 274
+    },
+    "msa": {
+      "IL7RA": {
+        "source": "drive_cache_sha_verified",
+        "path": "/content/drive/MyDrive/proteinAI/data/msa/IL7Ra_P16871_E21-D239.uniref.a3m",
+        "msa_depth_loaded": 921,
+        "msa_depth_realistic": true,
+        "sha256_matches_expected": true,
+        "fetch_info": {},
+        "bytes": 265464,
+        "sha256": "08e2a05b5b4787bb28c03302b1d56c3856980423a5582f2096bc6f5238b0be03",
+        "depth": 921,
+        "match_columns": 219,
+        "query_matches_target": true,
+        "first_header": ">101"
+      },
+      "TL1A": {
+        "source": "embedded_in_notebook",
+        "path": "/content/drive/MyDrive/proteinAI/data/msa/TL1A_O95150_L72-L251.uniref.a3m",
+        "msa_depth_loaded": 2037,
+        "msa_depth_realistic": true,
+        "sha256_matches_expected": true,
+        "fetch_info": {},
+        "bytes": 513283,
+        "sha256": "4464ad15470e2ecda72ea879beb5972059062085b04ff515cef26f642e092c27",
+        "depth": 2037,
+        "match_columns": 180,
+        "query_matches_target": true,
+        "first_header": ">101"
+      }
+    },
+    "msa_all_realistic": true,
+    "load_model": {
+      "dtype": "None",
+      "esmc_precision": "fp8",
+      "kernel_backend_effective": "fused",
+      "seconds": 108.9,
+      "vram_weights_gb": 6.85,
+      "vram_peak_during_load_gb": 6.852,
+      "vram_reserved_gb": 6.863,
+      "vram_free_after_load_gb": 14.952,
+      "ram_rss_gb": 4.83,
+      "n_params": 266656029,
+      "n_buffer_elements": 6346017830,
+      "msa_encoder_present": true,
+      "config_num_loops": 20,
+      "config_inference_num_steps": 14,
+      "config_lm_dropout": 0.25,
+      "ccd_load_seconds": 8.2,
+      "dtype_map": {
+        "folding_trunk (TRUNK, chay trong autocast)": "torch.float32",
+        "lm_encoder": "torch.float32",
+        "msa_encoder": "torch.float32",
+        "parcae_coda": "torch.float32",
+        "distogram_head  (NGOAI autocast, can fp32)": "torch.float32",
+        "structure_head  (NGOAI autocast, can fp32)": "torch.float32",
+        "confidence_head (NGOAI autocast, can fp32)": "torch.float32",
+        "esmc (fp8 -> weight nam trong buffer)": "torch.bfloat16"
+      }
+    },
+    "root_cause_repro": {
+      "distogram_head_weight_dtype_as_loaded": "torch.float32",
+      "fp32_head_on_fp32_input": "OK",
+      "bf16_head_on_fp32_input": "RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16",
+      "reproduces_notebook01_error": true
+    },
+    "ipsae_adapter": {
+      "ipsae_py": "/content/drive/MyDrive/proteinAI/data/ipsae.py",
+      "ipsae_sha256": "10cf9b08c68c91e06cb28526cf2026f47a3980c9048fd3226d13e3304eaf1c27",
+      "ipsae_url": "https://raw.githubusercontent.com/DunbrackLab/IPSAE/main/ipsae.py",
+      "pae_cutoff": 10,
+      "dist_cutoff": 10,
+      "path": "AF2 (.pdb + .json with pae/plddt/iptm/ptm)",
+      "pdb_order": "model token order -> permutation la identity by construction"
+    },
+    "dtype_settled": {
+      "working_config": "fp32_trunk_esmc_fp8_fused",
+      "dtype": "None",
+      "esmc_precision": "fp8",
+      "kernel_backend": "fused",
+      "heads_cast_to_fp32": false,
+      "n_configs_tried": 1,
+      "failed_configs": []
+    },
+    "determinism": {
+      "tested": true,
+      "pae_bitwise_identical": false,
+      "pae_max_abs_diff": 3.879425525665283,
+      "pae_mean_abs_diff": 0.03630172833800316,
+      "ptm_identical": false,
+      "iptm_identical": false,
+      "ptm": [
+        0.87324,
+        0.87266
+      ],
+      "iptm": [
+        0.93714,
+        0.93736
+      ],
+      "plddt_mean": [
+        0.87899,
+        0.87854
+      ],
+      "ipsae_min": [
+        0.748344,
+        0.749047
+      ],
+      "seconds": [
+        26.73,
+        21.57
+      ],
+      "ipsae_identical": false,
+      "ipsae_abs_diff": 0.000703
+    },
+    "pos_neg_control": {
+      "pos_ok": true,
+      "neg_ok": true,
+      "ipsae_min_pos": 0.748344,
+      "ipsae_min_neg": 0.0,
+      "ipsae_asym_pos": {
+        "A->B": 0.748344,
+        "B->A": 0.769589
+      },
+      "ipsae_asym_neg": {
+        "A->B": 0.0,
+        "B->A": 0.0
+      },
+      "gap": 0.74834,
+      "iptm_pos": 0.93714,
+      "iptm_neg": 0.2368,
+      "plddt_pos": 0.87899,
+      "plddt_neg": 0.75839,
+      "msa_depth_target": 921,
+      "msa_depth_realistic": true,
+      "threshold_pos": 0.5,
+      "threshold_gap": 0.15,
+      "verdict": "THUOC_DO_HOAT_DONG"
+    },
+    "msa_delta": {
+      "ran": true,
+      "ipsae_min_with_msa": 0.748344,
+      "msa_depth": 921,
+      "ipsae_min_no_msa": 0.761601,
+      "delta": -0.01326,
+      "iptm_with_msa": 0.93714,
+      "iptm_no_msa": 0.94157,
+      "plddt_with_msa": 0.87899,
+      "plddt_no_msa": 0.87632,
+      "seconds_with_msa": 26.73,
+      "seconds_no_msa": 20.16,
+      "vram_peak_with_msa": 8.27,
+      "vram_peak_no_msa": 8.049,
+      "warnings_no_msa": [
+        "No MSA provided for A, using single sequence mode",
+        "No MSA provided for B, using single sequence mode"
+      ]
+    },
+    "ceiling": {
+      "max_ok_residues": 775,
+      "first_oom_residues": null,
+      "vram_total_gb": 22.03,
+      "probe_num_loops": 4,
+      "probe_num_sampling_steps": 8,
+      "note": "tham so re -> VRAM dung duoc, THOI GIAN KHONG ngoai suy duoc"
+    },
+    "monomer_vs_trimer": {
+      "ran": true,
+      "probe_binder": "DcR3 O95407 res30-205 (PDB 3K51) \u2014 PROBE, not a candidate",
+      "settings_identical": true,
+      "num_loops": 10,
+      "num_sampling_steps": 50,
+      "offload_esmc": true,
+      "monomer": {
+        "n_residues": 356,
+        "ok": true,
+        "error": null,
+        "seconds": 23.37,
+        "vram_peak_gb": 7.984,
+        "iptm": 0.57335,
+        "ptm": 0.66836,
+        "plddt_mean": 0.81872,
+        "ipsae_asym_all": {
+          "A->Z": 0.167069,
+          "Z->A": 0.267342
+        },
+        "ipsae_binder_pairs": {
+          "A->Z": 0.167069,
+          "Z->A": 0.267342
+        },
+        "ipsae_binder_best": 0.267342,
+        "pair_chains_iptm": [
+          [
+            0.8154399991035461,
+            0.5733500123023987
+          ],
+          [
+            0.5382199883460999,
+            0.7527599930763245
+          ]
+        ]
+      },
+      "trimer": {
+        "n_residues": 716,
+        "ok": true,
+        "error": null,
+        "seconds": 102.67,
+        "vram_peak_gb": 9.785,
+        "iptm": 0.80854,
+        "ptm": 0.82322,
+        "plddt_mean": 0.79869,
+        "ipsae_asym_all": {
+          "A->B": 0.812172,
+          "B->A": 0.812766,
+          "A->C": 0.819299,
+          "C->A": 0.810132,
+          "A->Z": 0.522697,
+          "Z->A": 0.522937,
+          "B->C": 0.80871,
+          "C->B": 0.808086,
+          "B->Z": 0.539441,
+          "Z->B": 0.545034,
+          "C->Z": 0.436638,
+          "Z->C": 0.348084
+        },
+        "ipsae_binder_pairs": {
+          "A->Z": 0.522697,
+          "Z->A": 0.522937,
+          "B->Z": 0.539441,
+          "Z->B": 0.545034,
+          "C->Z": 0.436638,
+          "Z->C": 0.348084
+        },
+        "ipsae_binder_best": 0.545034,
+        "pair_chains_iptm": [
+          [
+            0.8669300079345703,
+            0.8514099717140198,
+            0.8510000109672546,
+            0.7433199882507324
+          ],
+          [
+            0.854669988155365,
+            0.8692399859428406,
+            0.8528599739074707,
+            0.7541999816894531
+          ],
+          [
+            0.8516799807548523,
+            0.8494600057601929,
+            0.8660299777984619,
+            0.6606799960136414
+          ],
+          [
+            0.7340199947357178,
+            0.739870011806488,
+            0.6937900185585022,
+            0.805840015411377
+          ]
+        ]
+      },
+      "delta_best": 0.27769,
+      "verdict": "KHAC_NHAU_PHAI_HOI_ORGANIZER"
+    }
+  },
+  "configs_tried": [
+    {
+      "config": "dtype=None, esmc=fp8",
+      "load_ok": true,
+      "seconds": 108.9,
+      "vram_weights_gb": 6.85,
+      "kernel_backend_effective": "fused"
+    },
+    {
+      "order": 1,
+      "name": "fp32_trunk_esmc_fp8_fused",
+      "dtype": "None",
+      "esmc": "fp8",
+      "kernel": "fused",
+      "reload": "False",
+      "cast_heads": "False",
+      "fold_ok": true,
+      "fold_seconds": 13.28,
+      "fold_error": null,
+      "has_pae": true,
+      "pae_shape": [
+        80,
+        80
+      ],
+      "vram_peak_gb": 7.059
+    }
+  ],
+  "folds": [
+    {
+      "tag": "min_fp32_trunk_esmc_fp8_fused",
+      "n_residues": 80,
+      "chains": [
+        {
+          "id": "A",
+          "len": 60,
+          "copies": 1,
+          "msa_depth": null
+        },
+        {
+          "id": "B",
+          "len": 20,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 1,
+      "num_sampling_steps": 4,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": false,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.858,
+      "token_order": {
+        "n_tokens": 80,
+        "n_residues_out": 80,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          60,
+          20
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for A, using single sequence mode",
+        "No MSA provided for B, using single sequence mode"
+      ],
+      "seconds": 13.28,
+      "vram_peak_gb": 7.059,
+      "vram_reserved_peak_gb": 7.115,
+      "vram_after_gb": 6.859,
+      "activation_gb": 0.201,
+      "vram_free_after_gb": 14.636,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.08209,
+      "iptm": 0.0141,
+      "plddt_mean_0to1": 0.17357,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        80,
+        80
+      ],
+      "pae_mean": 26.639961,
+      "pair_chains_iptm": [
+        [
+          0.08623000234365463,
+          0.013609999790787697
+        ],
+        [
+          0.014100000262260437,
+          0.29262998700141907
+        ]
+      ]
+    },
+    {
+      "tag": "gate_pos_r1",
+      "n_residues": 274,
+      "chains": [
+        {
+          "id": "A",
+          "len": 219,
+          "copies": 1,
+          "msa_depth": 921
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 20,
+      "num_sampling_steps": 200,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.859,
+      "token_order": {
+        "n_tokens": 274,
+        "n_residues_out": 274,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          219,
+          55
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for B, using single sequence mode"
+      ],
+      "seconds": 26.73,
+      "vram_peak_gb": 8.27,
+      "vram_reserved_peak_gb": 8.459,
+      "vram_after_gb": 6.861,
+      "activation_gb": 1.411,
+      "vram_free_after_gb": 13.286,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.87324,
+      "iptm": 0.93714,
+      "plddt_mean_0to1": 0.87899,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        274,
+        274
+      ],
+      "pae_mean": 6.867174,
+      "pae_npy": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r1/gate_pos_r1.pae.npy",
+      "pair_chains_iptm": [
+        [
+          0.8626199960708618,
+          0.7661399841308594
+        ],
+        [
+          0.9371399879455566,
+          0.9800699949264526
+        ]
+      ],
+      "ipsae": {
+        "ipsae_returncode": 0,
+        "ipsae_stderr": "",
+        "pdb": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r1/gate_pos_r1.pdb",
+        "json": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r1/gate_pos_r1.json",
+        "txt": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r1/gate_pos_r1_10_10.txt",
+        "asym": {
+          "A->B": 0.748344,
+          "B->A": 0.769589
+        },
+        "max": {
+          "A-B": 0.769589
+        },
+        "ipsae_min": 0.748344,
+        "ipsae_max": 0.769589
+      }
+    },
+    {
+      "tag": "gate_pos_r2",
+      "n_residues": 274,
+      "chains": [
+        {
+          "id": "A",
+          "len": 219,
+          "copies": 1,
+          "msa_depth": 921
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 20,
+      "num_sampling_steps": 200,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.861,
+      "token_order": {
+        "n_tokens": 274,
+        "n_residues_out": 274,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          219,
+          55
+        ]
+      },
+      "warnings": [
+        "No MSA provided for B, using single sequence mode"
+      ],
+      "seconds": 21.57,
+      "vram_peak_gb": 8.27,
+      "vram_reserved_peak_gb": 8.457,
+      "vram_after_gb": 6.861,
+      "activation_gb": 1.409,
+      "vram_free_after_gb": 13.288,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.87266,
+      "iptm": 0.93736,
+      "plddt_mean_0to1": 0.87854,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        274,
+        274
+      ],
+      "pae_mean": 6.880653,
+      "pae_npy": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r2/gate_pos_r2.pae.npy",
+      "pair_chains_iptm": [
+        [
+          0.8618000149726868,
+          0.7658500075340271
+        ],
+        [
+          0.9373599886894226,
+          0.9801700115203857
+        ]
+      ],
+      "ipsae": {
+        "ipsae_returncode": 0,
+        "ipsae_stderr": "",
+        "pdb": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r2/gate_pos_r2.pdb",
+        "json": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r2/gate_pos_r2.json",
+        "txt": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_r2/gate_pos_r2_10_10.txt",
+        "asym": {
+          "A->B": 0.749047,
+          "B->A": 0.771778
+        },
+        "max": {
+          "A-B": 0.771778
+        },
+        "ipsae_min": 0.749047,
+        "ipsae_max": 0.771778
+      }
+    },
+    {
+      "tag": "gate_neg",
+      "n_residues": 274,
+      "chains": [
+        {
+          "id": "A",
+          "len": 219,
+          "copies": 1,
+          "msa_depth": 921
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 20,
+      "num_sampling_steps": 200,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.861,
+      "token_order": {
+        "n_tokens": 274,
+        "n_residues_out": 274,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          219,
+          55
+        ]
+      },
+      "warnings": [
+        "No MSA provided for B, using single sequence mode"
+      ],
+      "seconds": 21.59,
+      "vram_peak_gb": 8.27,
+      "vram_reserved_peak_gb": 8.457,
+      "vram_after_gb": 6.861,
+      "activation_gb": 1.409,
+      "vram_free_after_gb": 13.288,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.73264,
+      "iptm": 0.2368,
+      "plddt_mean_0to1": 0.75839,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        274,
+        274
+      ],
+      "pae_mean": 12.977298,
+      "pae_npy": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_neg/gate_neg.pae.npy",
+      "pair_chains_iptm": [
+        [
+          0.8604999780654907,
+          0.10346999764442444
+        ],
+        [
+          0.23680000007152557,
+          0.4506100118160248
+        ]
+      ],
+      "ipsae": {
+        "ipsae_returncode": 0,
+        "ipsae_stderr": "",
+        "pdb": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_neg/gate_neg.pdb",
+        "json": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_neg/gate_neg.json",
+        "txt": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_neg/gate_neg_10_10.txt",
+        "asym": {
+          "A->B": 0.0,
+          "B->A": 0.0
+        },
+        "max": {
+          "A-B": 0.0
+        },
+        "ipsae_min": 0.0,
+        "ipsae_max": 0.0
+      }
+    },
+    {
+      "tag": "gate_pos_nomsa",
+      "n_residues": 274,
+      "chains": [
+        {
+          "id": "A",
+          "len": 219,
+          "copies": 1,
+          "msa_depth": null
+        },
+        {
+          "id": "B",
+          "len": 55,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 20,
+      "num_sampling_steps": 200,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": false,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.861,
+      "token_order": {
+        "n_tokens": 274,
+        "n_residues_out": 274,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B"
+        ],
+        "chain_lengths": [
+          219,
+          55
+        ]
+      },
+      "warnings": [
+        "No MSA provided for A, using single sequence mode",
+        "No MSA provided for B, using single sequence mode"
+      ],
+      "seconds": 20.16,
+      "vram_peak_gb": 8.049,
+      "vram_reserved_peak_gb": 8.104,
+      "vram_after_gb": 6.861,
+      "activation_gb": 1.188,
+      "vram_free_after_gb": 13.642,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.87737,
+      "iptm": 0.94157,
+      "plddt_mean_0to1": 0.87632,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        274,
+        274
+      ],
+      "pae_mean": 6.903404,
+      "pae_npy": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_nomsa/gate_pos_nomsa.pae.npy",
+      "pair_chains_iptm": [
+        [
+          0.8655999898910522,
+          0.7893700003623962
+        ],
+        [
+          0.941569983959198,
+          0.9787300229072571
+        ]
+      ],
+      "ipsae": {
+        "ipsae_returncode": 0,
+        "ipsae_stderr": "",
+        "pdb": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_nomsa/gate_pos_nomsa.pdb",
+        "json": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_nomsa/gate_pos_nomsa.json",
+        "txt": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/gate_pos_nomsa/gate_pos_nomsa_10_10.txt",
+        "asym": {
+          "A->B": 0.761601,
+          "B->A": 0.80378
+        },
+        "max": {
+          "A-B": 0.80378
+        },
+        "ipsae_min": 0.761601,
+        "ipsae_max": 0.80378
+      }
+    },
+    {
+      "tag": "probe_280",
+      "n_residues": 280,
+      "chains": [
+        {
+          "id": "A",
+          "len": 180,
+          "copies": 1,
+          "msa_depth": 2037
+        },
+        {
+          "id": "Z",
+          "len": 100,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 8,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.861,
+      "token_order": {
+        "n_tokens": 280,
+        "n_residues_out": 280,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "Z"
+        ],
+        "chain_lengths": [
+          180,
+          100
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for Z, using single sequence mode"
+      ],
+      "seconds": 5.88,
+      "vram_peak_gb": 8.396,
+      "vram_reserved_peak_gb": 8.586,
+      "vram_after_gb": 6.861,
+      "activation_gb": 1.535,
+      "vram_free_after_gb": 13.159,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.10404,
+      "iptm": 0.07283,
+      "plddt_mean_0to1": 0.2021,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        280,
+        280
+      ],
+      "pae_mean": 27.162519,
+      "pair_chains_iptm": [
+        [
+          0.12762999534606934,
+          0.06696999818086624
+        ],
+        [
+          0.07282999902963638,
+          0.13916000723838806
+        ]
+      ]
+    },
+    {
+      "tag": "probe_420",
+      "n_residues": 420,
+      "chains": [
+        {
+          "id": [
+            "A",
+            "B"
+          ],
+          "len": 180,
+          "copies": 2,
+          "msa_depth": 2037
+        },
+        {
+          "id": "Z",
+          "len": 60,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 8,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.861,
+      "token_order": {
+        "n_tokens": 420,
+        "n_residues_out": 420,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B",
+          "Z"
+        ],
+        "chain_lengths": [
+          180,
+          180,
+          60
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for Z, using single sequence mode"
+      ],
+      "seconds": 12.16,
+      "vram_peak_gb": 10.092,
+      "vram_reserved_peak_gb": 10.496,
+      "vram_after_gb": 6.862,
+      "activation_gb": 3.231,
+      "vram_free_after_gb": 11.249,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.11673,
+      "iptm": 0.08566,
+      "plddt_mean_0to1": 0.19771,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        420,
+        420
+      ],
+      "pae_mean": 28.266008,
+      "pair_chains_iptm": [
+        [
+          0.1576399952173233,
+          0.08630000054836273,
+          0.07605999708175659
+        ],
+        [
+          0.08308999985456467,
+          0.1594499945640564,
+          0.07389000058174133
+        ],
+        [
+          0.0852700024843216,
+          0.08448000252246857,
+          0.23995999991893768
+        ]
+      ]
+    },
+    {
+      "tag": "probe_540",
+      "n_residues": 540,
+      "chains": [
+        {
+          "id": [
+            "A",
+            "B",
+            "C"
+          ],
+          "len": 180,
+          "copies": 3,
+          "msa_depth": 2037
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 8,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.862,
+      "token_order": {
+        "n_tokens": 540,
+        "n_residues_out": 540,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B",
+          "C"
+        ],
+        "chain_lengths": [
+          180,
+          180,
+          180
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15."
+      ],
+      "seconds": 20.13,
+      "vram_peak_gb": 12.037,
+      "vram_reserved_peak_gb": 12.738,
+      "vram_after_gb": 6.863,
+      "activation_gb": 5.175,
+      "vram_free_after_gb": 9.005,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.15302,
+      "iptm": 0.12604,
+      "plddt_mean_0to1": 0.21267,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        540,
+        540
+      ],
+      "pae_mean": 27.967478,
+      "pair_chains_iptm": [
+        [
+          0.21638000011444092,
+          0.12604999542236328,
+          0.12268000096082687
+        ],
+        [
+          0.12522999942302704,
+          0.2074899971485138,
+          0.12416999787092209
+        ],
+        [
+          0.12878000736236572,
+          0.11959999799728394,
+          0.21220999956130981
+        ]
+      ]
+    },
+    {
+      "tag": "probe_640",
+      "n_residues": 640,
+      "chains": [
+        {
+          "id": [
+            "A",
+            "B",
+            "C"
+          ],
+          "len": 180,
+          "copies": 3,
+          "msa_depth": 2037
+        },
+        {
+          "id": "Z",
+          "len": 100,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 8,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.863,
+      "token_order": {
+        "n_tokens": 640,
+        "n_residues_out": 640,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B",
+          "C",
+          "Z"
+        ],
+        "chain_lengths": [
+          180,
+          180,
+          180,
+          100
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for Z, using single sequence mode"
+      ],
+      "seconds": 31.77,
+      "vram_peak_gb": 14.004,
+      "vram_reserved_peak_gb": 14.59,
+      "vram_after_gb": 6.864,
+      "activation_gb": 7.141,
+      "vram_free_after_gb": 7.153,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.15417,
+      "iptm": 0.1319,
+      "plddt_mean_0to1": 0.2026,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        640,
+        640
+      ],
+      "pae_mean": 28.621004,
+      "pair_chains_iptm": [
+        [
+          0.22234000265598297,
+          0.1306000053882599,
+          0.1430799961090088,
+          0.08455999940633774
+        ],
+        [
+          0.13665999472141266,
+          0.21323999762535095,
+          0.1320199966430664,
+          0.0885699987411499
+        ],
+        [
+          0.147489994764328,
+          0.12745000422000885,
+          0.21251000463962555,
+          0.0843999981880188
+        ],
+        [
+          0.09528999775648117,
+          0.09967000037431717,
+          0.09537000209093094,
+          0.24023999273777008
+        ]
+      ]
+    },
+    {
+      "tag": "probe_775",
+      "n_residues": 775,
+      "chains": [
+        {
+          "id": [
+            "A",
+            "B",
+            "C"
+          ],
+          "len": 180,
+          "copies": 3,
+          "msa_depth": 2037
+        },
+        {
+          "id": "Z",
+          "len": 235,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 8,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.864,
+      "token_order": {
+        "n_tokens": 775,
+        "n_residues_out": 775,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B",
+          "C",
+          "Z"
+        ],
+        "chain_lengths": [
+          180,
+          180,
+          180,
+          235
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for Z, using single sequence mode"
+      ],
+      "seconds": 63.08,
+      "vram_peak_gb": 17.161,
+      "vram_reserved_peak_gb": 17.893,
+      "vram_after_gb": 6.866,
+      "activation_gb": 10.296,
+      "vram_free_after_gb": 3.851,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.15115,
+      "iptm": 0.13382,
+      "plddt_mean_0to1": 0.20452,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        775,
+        775
+      ],
+      "pae_mean": 29.226349,
+      "pair_chains_iptm": [
+        [
+          0.2408899962902069,
+          0.15546000003814697,
+          0.1437699943780899,
+          0.09748999774456024
+        ],
+        [
+          0.14003999531269073,
+          0.21277999877929688,
+          0.14377999305725098,
+          0.09519000351428986
+        ],
+        [
+          0.14449000358581543,
+          0.1548900008201599,
+          0.23117999732494354,
+          0.09939999878406525
+        ],
+        [
+          0.09934999793767929,
+          0.10110999643802643,
+          0.10425999760627747,
+          0.19498999416828156
+        ]
+      ]
+    },
+    {
+      "tag": "probe_775_nomsa",
+      "n_residues": 775,
+      "chains": [
+        {
+          "id": [
+            "A",
+            "B",
+            "C"
+          ],
+          "len": 180,
+          "copies": 3,
+          "msa_depth": null
+        },
+        {
+          "id": "Z",
+          "len": 235,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 4,
+      "num_sampling_steps": 8,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": false,
+      "chunk_size": "default",
+      "msa_used": false,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.866,
+      "token_order": {
+        "n_tokens": 775,
+        "n_residues_out": 775,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B",
+          "C",
+          "Z"
+        ],
+        "chain_lengths": [
+          180,
+          180,
+          180,
+          235
+        ]
+      },
+      "warnings": [
+        "No MSA provided for Z, using single sequence mode",
+        "No MSA provided for ['A', 'B', 'C'], using single sequence mode"
+      ],
+      "seconds": 60.08,
+      "vram_peak_gb": 16.344,
+      "vram_reserved_peak_gb": 16.525,
+      "vram_after_gb": 6.866,
+      "activation_gb": 9.478,
+      "vram_free_after_gb": 5.218,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.14802,
+      "iptm": 0.12964,
+      "plddt_mean_0to1": 0.19788,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        775,
+        775
+      ],
+      "pae_mean": 29.213007,
+      "pair_chains_iptm": [
+        [
+          0.22678999602794647,
+          0.1498199999332428,
+          0.14924000203609467,
+          0.0954200029373169
+        ],
+        [
+          0.14600999653339386,
+          0.2228900045156479,
+          0.14295999705791473,
+          0.09640000015497208
+        ],
+        [
+          0.1393900066614151,
+          0.13771000504493713,
+          0.22191999852657318,
+          0.09602999687194824
+        ],
+        [
+          0.10367000102996826,
+          0.10400000214576721,
+          0.10623999685049057,
+          0.19475999474525452
+        ]
+      ]
+    },
+    {
+      "tag": "tl1a_mono_dcr3",
+      "n_residues": 356,
+      "chains": [
+        {
+          "id": "A",
+          "len": 180,
+          "copies": 1,
+          "msa_depth": 2037
+        },
+        {
+          "id": "Z",
+          "len": 176,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 10,
+      "num_sampling_steps": 50,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": true,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 6.866,
+      "token_order": {
+        "n_tokens": 356,
+        "n_residues_out": 356,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "Z"
+        ],
+        "chain_lengths": [
+          180,
+          176
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for Z, using single sequence mode"
+      ],
+      "seconds": 23.37,
+      "vram_peak_gb": 7.984,
+      "vram_reserved_peak_gb": 8.209,
+      "vram_after_gb": 0.939,
+      "activation_gb": 1.118,
+      "vram_free_after_gb": 18.077,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.66836,
+      "iptm": 0.57335,
+      "plddt_mean_0to1": 0.81872,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        356,
+        356
+      ],
+      "pae_mean": 13.357365,
+      "pair_chains_iptm": [
+        [
+          0.8154399991035461,
+          0.5733500123023987
+        ],
+        [
+          0.5382199883460999,
+          0.7527599930763245
+        ]
+      ],
+      "ipsae": {
+        "ipsae_returncode": 0,
+        "ipsae_stderr": "",
+        "pdb": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/tl1a_mono_dcr3/tl1a_mono_dcr3.pdb",
+        "json": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/tl1a_mono_dcr3/tl1a_mono_dcr3.json",
+        "txt": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/tl1a_mono_dcr3/tl1a_mono_dcr3_10_10.txt",
+        "asym": {
+          "A->Z": 0.167069,
+          "Z->A": 0.267342
+        },
+        "max": {
+          "A-Z": 0.267342
+        },
+        "ipsae_min": 0.167069,
+        "ipsae_max": 0.267342
+      }
+    },
+    {
+      "tag": "tl1a_tri_dcr3",
+      "n_residues": 716,
+      "chains": [
+        {
+          "id": [
+            "A",
+            "B",
+            "C"
+          ],
+          "len": 180,
+          "copies": 3,
+          "msa_depth": 2037
+        },
+        {
+          "id": "Z",
+          "len": 176,
+          "copies": 1,
+          "msa_depth": null
+        }
+      ],
+      "num_loops": 10,
+      "num_sampling_steps": 50,
+      "num_diffusion_samples": 1,
+      "seed": 0,
+      "lm_dropout": 0.3,
+      "offload_esmc": true,
+      "chunk_size": "default",
+      "msa_used": true,
+      "kernel_backend": "fused",
+      "ok": true,
+      "vram_before_gb": 0.939,
+      "token_order": {
+        "n_tokens": 716,
+        "n_residues_out": 716,
+        "is_permutation": true,
+        "is_identity": true,
+        "chain_order": [
+          "A",
+          "B",
+          "C",
+          "Z"
+        ],
+        "chain_lengths": [
+          180,
+          180,
+          180,
+          176
+        ]
+      },
+      "warnings": [
+        "AnnAssign.__init__ missing 1 required positional argument: 'simple'. This will become an error in Python 3.15.",
+        "No MSA provided for Z, using single sequence mode"
+      ],
+      "seconds": 102.67,
+      "vram_peak_gb": 9.785,
+      "vram_reserved_peak_gb": 10.982,
+      "vram_after_gb": 0.939,
+      "activation_gb": 8.845,
+      "vram_free_after_gb": 10.761,
+      "has_pae": true,
+      "has_plddt": true,
+      "ptm": 0.82322,
+      "iptm": 0.80854,
+      "plddt_mean_0to1": 0.79869,
+      "plddt_scale_looks_0to1": true,
+      "pae_shape": [
+        716,
+        716
+      ],
+      "pae_mean": 12.282139,
+      "pair_chains_iptm": [
+        [
+          0.8669300079345703,
+          0.8514099717140198,
+          0.8510000109672546,
+          0.7433199882507324
+        ],
+        [
+          0.854669988155365,
+          0.8692399859428406,
+          0.8528599739074707,
+          0.7541999816894531
+        ],
+        [
+          0.8516799807548523,
+          0.8494600057601929,
+          0.8660299777984619,
+          0.6606799960136414
+        ],
+        [
+          0.7340199947357178,
+          0.739870011806488,
+          0.6937900185585022,
+          0.805840015411377
+        ]
+      ],
+      "ipsae": {
+        "ipsae_returncode": 0,
+        "ipsae_stderr": "",
+        "pdb": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/tl1a_tri_dcr3/tl1a_tri_dcr3.pdb",
+        "json": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/tl1a_tri_dcr3/tl1a_tri_dcr3.json",
+        "txt": "/content/drive/MyDrive/proteinAI/runs/02_dtype_fix/tl1a_tri_dcr3/tl1a_tri_dcr3_10_10.txt",
+        "asym": {
+          "A->B": 0.812172,
+          "B->A": 0.812766,
+          "A->C": 0.819299,
+          "C->A": 0.810132,
+          "A->Z": 0.522697,
+          "Z->A": 0.522937,
+          "B->C": 0.80871,
+          "C->B": 0.808086,
+          "B->Z": 0.539441,
+          "Z->B": 0.545034,
+          "C->Z": 0.436638,
+          "Z->C": 0.348084
+        },
+        "max": {
+          "A-B": 0.812766,
+          "A-C": 0.819299,
+          "A-Z": 0.522937,
+          "B-C": 0.80871,
+          "B-Z": 0.545034,
+          "C-Z": 0.436638
+        },
+        "ipsae_min": 0.348084,
+        "ipsae_max": 0.819299
+      }
+    }
+  ],
+  "ceiling_probe": [
+    {
+      "n_protomer": 1,
+      "binder_len": 100,
+      "n_residues": 280,
+      "mode": "plain",
+      "msa_used": true,
+      "ok": true,
+      "error": null,
+      "seconds": 5.88,
+      "vram_peak_gb": 8.396,
+      "activation_gb": 1.535,
+      "vram_before_gb": 6.861,
+      "plddt_mean": 0.2021,
+      "ptm": 0.10404
+    },
+    {
+      "n_protomer": 2,
+      "binder_len": 60,
+      "n_residues": 420,
+      "mode": "plain",
+      "msa_used": true,
+      "ok": true,
+      "error": null,
+      "seconds": 12.16,
+      "vram_peak_gb": 10.092,
+      "activation_gb": 3.231,
+      "vram_before_gb": 6.861,
+      "plddt_mean": 0.19771,
+      "ptm": 0.11673
+    },
+    {
+      "n_protomer": 3,
+      "binder_len": 0,
+      "n_residues": 540,
+      "mode": "plain",
+      "msa_used": true,
+      "ok": true,
+      "error": null,
+      "seconds": 20.13,
+      "vram_peak_gb": 12.037,
+      "activation_gb": 5.175,
+      "vram_before_gb": 6.862,
+      "plddt_mean": 0.21267,
+      "ptm": 0.15302
+    },
+    {
+      "n_protomer": 3,
+      "binder_len": 100,
+      "n_residues": 640,
+      "mode": "plain",
+      "msa_used": true,
+      "ok": true,
+      "error": null,
+      "seconds": 31.77,
+      "vram_peak_gb": 14.004,
+      "activation_gb": 7.141,
+      "vram_before_gb": 6.863,
+      "plddt_mean": 0.2026,
+      "ptm": 0.15417
+    },
+    {
+      "n_protomer": 3,
+      "binder_len": 235,
+      "n_residues": 775,
+      "mode": "plain",
+      "msa_used": true,
+      "ok": true,
+      "error": null,
+      "seconds": 63.08,
+      "vram_peak_gb": 17.161,
+      "activation_gb": 10.296,
+      "vram_before_gb": 6.864,
+      "plddt_mean": 0.20452,
+      "ptm": 0.15115
+    },
+    {
+      "n_protomer": 3,
+      "binder_len": 235,
+      "n_residues": 775,
+      "mode": "no_msa",
+      "msa_used": false,
+      "ok": true,
+      "error": null,
+      "seconds": 60.08,
+      "vram_peak_gb": 16.344,
+      "activation_gb": 9.478,
+      "vram_before_gb": 6.866,
+      "plddt_mean": 0.19788,
+      "ptm": 0.14802
+    }
+  ],
+  "errors": [],
+  "manual_fill": {
+    "compute_units_remaining_before_run": "<<DIEN TAY>>",
+    "compute_units_remaining_after_run": "<<DIEN TAY>>"
+  },
+  "elapsed_min": 39.63,
+  "cu_estimate": 3.17
+}

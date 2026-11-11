@@ -1,0 +1,32 @@
+
+========================================
+PASTE CHO CLAUDE — BẮT ĐẦU
+========================================
+{
+  "notebook": "04_candidate_generation_bindcraft",
+  "timestamp_utc": "2026-11-11T10:22:08Z",
+  "environment": {
+    "gpu": "NVIDIA L4",
+    "vram_total_gb": 22.03,
+    "vram_free_gb": 21.84,
+    "drive_mounted": false
+  },
+  "generation_summary": {
+    "targets_evaluated": [
+      "TL1A"
+    ],
+    "total_generated": 50,
+    "total_valid_for_screening": 50,
+    "length_min": 85,
+    "length_max": 100,
+    "strict_bounds_85_100_pass_rate": 1.0,
+    "manifest_path": "./proteinAI_local/out/candidate_pool_for_screening.csv"
+  },
+  "breakdown_by_target": {
+    "TL1A": 50
+  }
+}
+========================================
+PASTE CHO CLAUDE — KẾT THÚC
+========================================
+✅ Báo cáo đã lưu tại: ./proteinAI_local/out/04_candidate_generation_report.json

@@ -1,0 +1,206 @@
+{
+  "notebook": "03_esmfold2_screening",
+  "schema": 1,
+  "started_utc": "2026-11-11T10:24:10Z",
+  "env": {
+    "python": "3.13.16",
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+    "torch_version": "2.14.1+cu130",
+    "gpu": "NVIDIA L4",
+    "compute_capability": [
+      8,
+      9
+    ],
+    "vram_total_gb": 22.03,
+    "vram_free_gb": 21.84,
+    "drive_free_gb": 106.9,
+    "content_free_gb": 112.5
+  },
+  "knobs": {
+    "model_dtype": "None",
+    "esmc_precision": "fp8",
+    "kernel_backend": "fused",
+    "gate_num_loops": 20,
+    "gate_num_sampling_steps": 200,
+    "gate_lm_dropout": 0.3,
+    "fast_mode": false,
+    "pae_cutoff": 10,
+    "dist_cutoff": 10
+  },
+  "steps": {
+    "install": {
+      "esm_version": "3.4.3",
+      "seconds": 29.2
+    },
+    "weights": {
+      "model_dir": "/content/esmfold2_weights",
+      "stage_seconds": 722.3
+    },
+    "msa": {
+      "il7ra_depth": 921,
+      "tl1a_depth": 2037
+    },
+    "load_model": {
+      "seconds": 117.4,
+      "vram_weights_gb": 6.85,
+      "vram_free_after_load_gb": 14.95,
+      "msa_encoder_present": true
+    },
+    "ipsae_adapter": {
+      "ipsae_py": "/content/drive/MyDrive/proteinAI/data/ipsae.py",
+      "status": "ready"
+    },
+    "novelty_db": {
+      "il7ra_seqs": 0,
+      "tl1a_seqs": 0
+    }
+  },
+  "screened_candidates": [
+    {
+      "name": "ctrl_pos_7S5B_IL7Ra",
+      "target": "IL7RA",
+      "length": 55,
+      "total_complex_residues": 274,
+      "tag": "screen_001_ctrl_pos_7S5B_IL7Ra",
+      "binder_chain": "B",
+      "ok": true,
+      "fold_seconds": 35.6,
+      "vram_peak_gb": 8.27,
+      "ptm": 0.8728,
+      "iptm": 0.9374,
+      "plddt_mean": 87.86,
+      "ipsae_binder": 0.772791,
+      "ipsae_min": 0.74884,
+      "ipsae_pairs": {
+        "A->B": 0.74884,
+        "B->A": 0.772791
+      },
+      "verdict": "PASS",
+      "max_identity_pct": 0.0,
+      "coverage_ours_pct": 0.0,
+      "worst_hit_id": "NO_DB",
+      "verdict_strict": "PASS",
+      "screen_verdict": "PASS"
+    },
+    {
+      "name": "ctrl_neg_scrambled_IL7Ra",
+      "target": "IL7RA",
+      "length": 55,
+      "total_complex_residues": 274,
+      "tag": "screen_002_ctrl_neg_scrambled_IL7Ra",
+      "binder_chain": "B",
+      "ok": true,
+      "fold_seconds": 22.2,
+      "vram_peak_gb": 8.27,
+      "ptm": 0.7224,
+      "iptm": 0.2071,
+      "plddt_mean": 78.22,
+      "ipsae_binder": 0.0,
+      "ipsae_min": 0.0,
+      "ipsae_pairs": {
+        "A->B": 0.0,
+        "B->A": 0.0
+      },
+      "verdict": "PASS",
+      "max_identity_pct": 0.0,
+      "coverage_ours_pct": 0.0,
+      "worst_hit_id": "NO_DB",
+      "verdict_strict": "PASS",
+      "screen_verdict": "REVIEW"
+    },
+    {
+      "name": "probe_dcr3_TL1A",
+      "target": "TL1A",
+      "length": 176,
+      "total_complex_residues": 716,
+      "tag": "screen_003_probe_dcr3_TL1A",
+      "binder_chain": "Z",
+      "ok": true,
+      "fold_seconds": 196.6,
+      "vram_peak_gb": 15.71,
+      "ptm": 0.8166,
+      "iptm": 0.8009,
+      "plddt_mean": 79.57,
+      "ipsae_binder": 0.561002,
+      "ipsae_min": 0.343129,
+      "ipsae_pairs": {
+        "A->Z": 0.423044,
+        "Z->A": 0.343129,
+        "B->Z": 0.510068,
+        "Z->B": 0.545559,
+        "C->Z": 0.529081,
+        "Z->C": 0.561002
+      },
+      "verdict": "PASS",
+      "max_identity_pct": 0.0,
+      "coverage_ours_pct": 0.0,
+      "worst_hit_id": "NO_DB",
+      "verdict_strict": "PASS",
+      "screen_verdict": "PASS"
+    }
+  ],
+  "errors": [],
+  "elapsed_min": 19.45,
+  "cu_estimate": 1.556,
+  "candidates_input_count": 3,
+  "finished_utc": "2026-11-11T10:43:05Z",
+  "summary_table": [
+    {
+      "rank": 1,
+      "name": "ctrl_pos_7S5B_IL7Ra",
+      "target": "IL7RA",
+      "length": 55,
+      "screen_verdict": "PASS",
+      "ipsae_binder": 0.772791,
+      "ipsae_min": 0.74884,
+      "iptm": 0.9374,
+      "ptm": 0.8728,
+      "plddt_mean": 87.86,
+      "novelty_verdict": "PASS",
+      "max_identity_pct": 0.0,
+      "coverage_ours_pct": 0.0,
+      "worst_hit_id": "NO_DB",
+      "fold_seconds": 35.6,
+      "vram_peak_gb": 8.27,
+      "error": ""
+    },
+    {
+      "rank": 2,
+      "name": "probe_dcr3_TL1A",
+      "target": "TL1A",
+      "length": 176,
+      "screen_verdict": "PASS",
+      "ipsae_binder": 0.561002,
+      "ipsae_min": 0.343129,
+      "iptm": 0.8009,
+      "ptm": 0.8166,
+      "plddt_mean": 79.57,
+      "novelty_verdict": "PASS",
+      "max_identity_pct": 0.0,
+      "coverage_ours_pct": 0.0,
+      "worst_hit_id": "NO_DB",
+      "fold_seconds": 196.6,
+      "vram_peak_gb": 15.71,
+      "error": ""
+    },
+    {
+      "rank": 3,
+      "name": "ctrl_neg_scrambled_IL7Ra",
+      "target": "IL7RA",
+      "length": 55,
+      "screen_verdict": "REVIEW",
+      "ipsae_binder": 0.0,
+      "ipsae_min": 0.0,
+      "iptm": 0.2071,
+      "ptm": 0.7224,
+      "plddt_mean": 78.22,
+      "novelty_verdict": "PASS",
+      "max_identity_pct": 0.0,
+      "coverage_ours_pct": 0.0,
+      "worst_hit_id": "NO_DB",
+      "fold_seconds": 22.2,
+      "vram_peak_gb": 8.27,
+      "error": ""
+    }
+  ]
+}
