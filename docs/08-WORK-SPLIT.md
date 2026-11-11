@@ -1,21 +1,48 @@
 # Phân việc Claude ↔ Antigravity
 
-## Thực tế kỹ thuật
+## Thực tế kỹ thuật (đã kiểm 2026-11-11)
 
-Antigravity 2.16.0 đã cài (`/usr/bin/antigravity` → `/opt/Antigravity`). Nó là **app Electron fork VS Code,
-không có CLI headless** — `antigravity --help` chỉ mở GUI. Nên **tôi không gọi được agent của nó bằng lệnh.**
+**Antigravity GUI: không có CLI.** `antigravity 2.16.0` là app Electron fork VS Code.
+Package AUR không có `bin/` wrapper (chỗ VS Code để `cli.js`), và `app.asar` không chứa `cli.js`.
+`antigravity --help` chỉ mở GUI. → không gọi agent của GUI bằng lệnh được.
 
-Kênh truyền là **filesystem**: cả hai bên cùng nhìn `/home/ngochieu/repo/proteinAI`.
+**NHƯNG `gemini` CLI đã cài sẵn** ở `~/.local/bin/gemini` (+ node v26.7.0 qua mise), và nó **headless, script được**.
+Hai thứ dùng chung thư mục config `~/.gemini/` (có cả `~/.gemini/antigravity/`), nên **dùng chung auth**.
 
+→ **Claude gọi trực tiếp agent Gemini được.** Không cần copy-paste, không cần bạn làm trung gian.
+
+### Lệnh chuẩn
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+cd /home/ngochieu/repo/proteinAI
+gemini -p "$(cat docs/briefs/AGY-01-novelty-checker.md)" \
+       --approval-mode auto_edit \
+       --skip-trust \
+       -o json \
+       --include-directories /home/ngochieu/repo/proteinAI
 ```
-Claude ghi brief → docs/briefs/AGY-xx-*.md
-                        ↓  bạn nói với agent agy: "đọc docs/briefs/AGY-01-*.md rồi làm đúng nó"
-                   agy làm, ghi code + báo cáo vào repo
-                        ↓
-Claude đọc kết quả, chạy self-test, review, quyết bước tiếp
-```
 
-Bạn không phải copy-paste gì dài — chỉ cần đưa agy **đường dẫn file brief**.
+Các flag quan trọng:
+
+| Flag | Vì sao |
+|---|---|
+| `-p` | chế độ headless (không có nó thì vào interactive, treo) |
+| `--approval-mode` | `plan` = read-only (phân tích) · `auto_edit` = tự duyệt sửa file · `yolo` = tự duyệt mọi thứ kể cả chạy lệnh |
+| `--skip-trust` | tin workspace trong session này. Không có nó → bị hạ về `default` rồi treo chờ người duyệt |
+| `-o json` | output máy đọc được, để Claude parse kết quả |
+| `-m` | chọn model, nếu cần hạ xuống model rẻ cho việc cơ học |
+
+**Mức approval theo loại việc:** phân tích/đọc → `plan`. Viết code + self-test → `auto_edit`.
+Cần `pip install`/chạy lệnh hệ thống → `yolo`, và chỉ khi git đã sạch.
+
+### An toàn: git là lưới đỡ
+
+Repo **trước đây không có VCS** → agent auto-approve mà xoá nhầm là mất vĩnh viễn.
+Đã `git init` + commit snapshot (47 file, commit `11f06e5`).
+`data/known_binders/` (122k sequence) và `data/msa/` (MSA thật depth 921/2037) đều đắt và không lấy lại từ cache được.
+
+**Luật: trước mỗi lần chạy agent ở `yolo`, `git status` phải sạch.** Hỏng thì `git checkout -- .`.
 
 ## Nguyên tắc phân việc: theo KIỂU THẤT BẠI, không theo độ khó
 
