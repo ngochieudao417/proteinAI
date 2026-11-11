@@ -1,0 +1,70 @@
+Let me read the relevant files first.
+Now let me read the docs/briefs/AGY-01-RESULT.md file:
+Tôi đã đọc xong tất cả file. Giờ sẽ thực hiện 4 thay đổi theo yêu cầu:
+
+1. Sửa `_sw_align` trong `novelty_check.py` — dùng traceback thay vì begin/end offset
+2. Thêm assert phòng vệ
+3. Sửa test Case 4 trong `test_novelty_check.py`
+4. Cập nhật `docs/briefs/AGY-01-RESULT.md`
+
+---
+
+### Bước 1: Sửa `novelty_check.py`
+
+Thay toàn bộ hàm `_sw_align`, `_decode_cigar`, và `_get_int_attr`:
+Bây giờ cần xóa hàm `_decode_cigar` và `_get_int_attr` cũ (chúng không còn được dùng) và bỏ import `re` nếu không còn cần — nhưng để chắc chắn, hãy kiểm tra xem file trông thế nào sau sửa:
+Hàm cũ `_decode_cigar` và `_get_int_attr` đã bị xoá, và `import re` ở dòng 24 không còn cần thiết nữa. Hãy kiểm tra và bỏ nó:
+`import re` vẫn còn ở dòng 24 nhưng không còn được dùng. Xóa nó để giữ code gọn:
+---
+
+### Bước 2: Sửa Case 4 trong `test_novelty_check.py`
+
+Cần thêm hàm `_sw_align_pair` để tra cứu kết quả per-hit, rồi sửa test Case 4:
+Bây giờ sửa nội dung test_case_4 để kiểm đúng per-hit với chính binder được nhúng:
+---
+
+### Bước 3: Cập nhật `docs/briefs/AGY-01-RESULT.md`
+Giờ hãy kiểm tra lại toàn bộ `_sw_align` trong file để đảm bảo không còn tham chiếu nào đến `_decode_cigar`, `_get_int_attr`, hoặc `re.findall`:
+Trông sạch sẽ. Giờ kiểm tra test_novelty_check.py phần Case 4 cuối:
+Tất cả trông đúng. Kiểm tra nhanh phần đầu file test để đảm bảo import và helpers vẫn ổn:
+Mọi thứ đã đúng. Dưới đây là tóm tắt tất cả thay đổi đã thực hiện:
+
+---
+
+## Tóm tắt thay đổi
+
+### 1. [`tools/novelty_check.py`](file:///home/ngochieu/repo/proteinAI/tools/novelty_check.py)
+
+**Đã xoá hoàn toàn:**
+- Hàm `_decode_cigar()` — không còn cần
+- Hàm `_get_int_attr()` — không còn cần
+- `import re` — không còn dùng
+- Toàn bộ logic đọc `beg_query`, `beg_ref`, `read_begin1`, `query_begin`, `cigar.decode`, fallback về 0
+
+**Đã viết lại `_sw_align()`** dùng traceback trực tiếp:
+```python
+tb      = result.traceback
+q_al    = tb.query        # chuỗi có thể chứa '-'
+r_al    = tb.ref
+q_aligned = sum(1 for a in q_al if a != '-')   # đếm thực sự
+r_aligned = sum(1 for b in r_al if b != '-')
+```
+
+**Thêm 2 assert phòng vệ** — raise `RuntimeError` rõ ràng thay vì fallback âm thầm.
+
+### 2. [`tools/test_novelty_check.py`](file:///home/ngochieu/repo/proteinAI/tools/test_novelty_check.py)
+
+**Thêm helper `_align_one_pair(candidate_seq, binder_seq)`** — gọi `nc._sw_align()` trực tiếp cho một cặp, trả dict với coverage/identity.
+
+**Sửa Case 4** thành 2 sub-check:
+- **Sub-A**: alignment trực tiếp candidate vs *chính binder được nhúng* → kiểm `coverage_ours ≈ 66.7% (sai số < 1%)` và `identity ≥ 99%`
+- **Sub-B**: full DB run → kiểm `verdict == PASS`
+
+### 3. [`docs/briefs/AGY-01-RESULT.md`](file:///home/ngochieu/repo/proteinAI/docs/briefs/AGY-01-RESULT.md)
+
+Thêm **mục "Bug đã sửa"** ở đầu, ghi rõ:
+- Nguyên nhân gốc (`cigar.beg_query = 0` là relative offset, không phải absolute)
+- Cách sửa (traceback-based)
+- Các file thay đổi
+
+Phần kết quả test vẫn để trống như yêu cầu.

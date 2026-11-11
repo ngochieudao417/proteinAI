@@ -54,6 +54,20 @@ Dùng một trong hai, thứ tự ưu tiên:
 1. `pip install parasail` — SIMD Smith-Waterman, cho ra score + traceback. Nhanh nhất, đơn giản nhất.
 2. `mmseqs2` (AUR: `yay -S mmseqs2`) với `easy-search`, nếu parasail không lắp được.
 
+⚠️ **BẮT BUỘC DÙNG VENV.** Máy này là Arch Linux, python 3.14 có `EXTERNALLY-MANAGED` (PEP 668)
+→ `pip install` vào system python **sẽ bị chặn**, và dù không chặn thì cũng không được làm bẩn system env.
+Làm đúng thế này:
+
+```bash
+cd /home/ngochieu/repo/proteinAI
+python3 -m venv .venv
+.venv/bin/pip install -q --upgrade pip
+.venv/bin/pip install -q parasail
+```
+
+Mọi script chạy bằng `.venv/bin/python3`. Ghi rõ trong báo cáo là đã dùng venv.
+`.venv/` phải được thêm vào `.gitignore` (đừng commit 100MB thư viện).
+
 Mục tiêu: **chạy xong 20 sequence dưới 5 phút**. Báo thời gian thật trong kết quả.
 Nếu dùng mmseqs, chú ý nó là tool heuristic — phải đặt sensitivity cao (`-s 7.5`) và `--max-seqs` lớn,
 nếu không nó bỏ sót hit. Và ghi rõ trong báo cáo là đã dùng heuristic.
@@ -81,10 +95,27 @@ Dữ kiện đã xác nhận, dùng luôn:
   `0.8 × 84 = 67.2 > 67` → về mặt toán học **không known binder nào chạm được ngưỡng coverage**.
   **Công cụ phải tái tạo đúng kết luận này** — xem self-test case 4.
 
-## SELF-TEST BẮT BUỘC
+## ⚠️ BẠN KHÔNG CHẠY ĐƯỢC LỆNH SHELL — ĐỌC KỸ
 
-Viết `tools/test_novelty_check.py`, chạy được bằng `python3 tools/test_novelty_check.py`, in PASS/FAIL từng case.
-**Không báo cáo xong việc nếu còn case nào đỏ.**
+Bạn chạy ở chế độ **chỉ ghi file**, không có quyền chạy lệnh. Nghĩa là:
+
+- **Bạn KHÔNG tự chạy được test, KHÔNG tự `pip install`, KHÔNG tự thử code.**
+- Môi trường đã được chuẩn bị sẵn cho bạn: venv ở `.venv/` **đã có `parasail` cài rồi**.
+  Code của bạn cứ `import parasail` bình thường. Người review sẽ chạy bằng `.venv/bin/python3`.
+- **Viết code như thể không có cơ hội debug.** Không đoán API — nếu không chắc chữ ký hàm `parasail`,
+  hãy viết phòng vệ (try/except, kiểm kiểu, kiểm thuộc tính tồn tại) và **ghi rõ chỗ bạn không chắc**
+  vào mục "chỗ chưa chắc" trong báo cáo.
+- **TUYỆT ĐỐI KHÔNG viết trong báo cáo rằng test đã pass.** Bạn không chạy được test thì không biết được.
+  Viết test, mô tả nó kiểm gì, rồi để trống phần kết quả. Người review chạy và điền.
+  Báo cáo khống là lỗi nặng nhất có thể mắc ở đây.
+
+## SELF-TEST — BẠN VIẾT, NGƯỜI KHÁC CHẠY
+
+Viết `tools/test_novelty_check.py`, chạy được bằng `.venv/bin/python3 tools/test_novelty_check.py`,
+in `PASS`/`FAIL` cho từng case kèm số thật, và `exit(1)` nếu có case đỏ.
+
+Test phải **tự chứa**: tự đọc dữ liệu từ `data/known_binders/`, tự sinh sequence test với seed cố định,
+không cần tham số dòng lệnh, không cần mạng.
 
 | # | Input | Kết quả bắt buộc |
 |---|---|---|
@@ -107,12 +138,13 @@ docs/briefs/AGY-01-RESULT.md    — báo cáo
 
 Báo cáo `AGY-01-RESULT.md` phải có:
 
-1. Dùng engine alignment nào, phiên bản bao nhiêu, vì sao chọn
-2. **Kết quả self-test, dán nguyên output**, 6/6 case
-3. Thời gian chạy thật cho 20 sequence × 122.273 DB
-4. Cách cài dependency (lệnh chính xác, để lần sau dựng lại được)
-5. Những chỗ bạn phải tự quyết định vì brief chưa nói rõ — ghi rõ đã quyết thế nào
-6. Hạn chế đã biết của công cụ
+1. Dùng engine alignment nào, vì sao chọn
+2. **Mỗi self-test case kiểm cái gì** — và để **TRỐNG** phần kết quả (người review chạy rồi điền).
+   Không được tự ghi là pass.
+3. **Chỗ chưa chắc** — liệt kê mọi API/chữ ký hàm bạn không chắc 100%, để người review biết chỗ nào dễ nổ
+4. Những chỗ bạn phải tự quyết vì brief chưa nói rõ — ghi rõ đã quyết thế nào và vì sao
+5. Hạn chế đã biết của công cụ
+6. Độ phức tạp tính toán bạn dự kiến, để đối chiếu với thời gian chạy thật
 
 ## RÀNG BUỘC
 
