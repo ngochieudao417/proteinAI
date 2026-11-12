@@ -1,0 +1,38 @@
+2026-11-11 23:51:29 [INFO] ======================================================================
+2026-11-11 23:51:29 [INFO] STARTING QUANDELA CLOUD QUANTUM ENGINE RUNNER
+2026-11-11 23:51:29 [INFO] Timestamp: 2026-11-11T16:51:29.659792+00:00
+2026-11-11 23:51:29 [INFO] Platform requested: sim:slos | Mode: Cloud
+2026-11-11 23:51:29 [INFO] ======================================================================
+2026-11-11 23:51:30 [INFO] Platform Availability Check: sim:slos -> available (Type: simulator)
+2026-11-11 23:51:30 [INFO] ======================================================================
+2026-11-11 23:51:30 [INFO] RUNNING LIVE QUANTUM DEMONSTRATION ON SIM:SLOS
+2026-11-11 23:51:30 [INFO] ======================================================================
+2026-11-11 23:51:30 [INFO] [Demo 1] Submitting 2-mode Hong-Ou-Mandel circuit (|1, 1> -> 50:50 Beam Splitter)...
+2026-11-11 23:51:47 [INFO] Job ID: 83043319-dfe2-4f0f-af47-c9e79c175e2b
+2026-11-11 23:51:47 [INFO] Platform: sim:slos | Status: SUCCESS | Duration: 17.19s
+2026-11-11 23:51:47 [INFO] Raw Photon Counts: {'|0,2>': 47, '|2,0>': 53}
+2026-11-11 23:51:47 [INFO] HOM Quantum Bunching Ratio: 1.0000 (Theoretical: 1.0000)
+2026-11-11 23:51:47 [INFO] Coincidence Clicks |1,1>: 0 (Theoretical: 0)
+2026-11-11 23:51:47 [INFO] Quantum Interference Fidelity: 100.00%
+2026-11-11 23:51:47 [INFO] ----------------------------------------------------------------------
+2026-11-11 23:51:47 [INFO] [Demo 2] Submitting 4-mode parameterized folding ansatz circuit...
+2026-11-11 23:52:05 [INFO] Ansatz Job ID: 119a2129-d38f-4f6f-99de-1d65fce5a259
+2026-11-11 23:52:05 [INFO] Ansatz Platform: sim:slos | Status: SUCCESS | Duration: 17.67s
+2026-11-11 23:52:05 [INFO] Ansatz Output Distribution: {'|0,0,1,1>': 0.09, '|0,0,0,2>': 0.18, '|0,1,0,1>': 0.44, '|0,2,0,0>': 0.09, '|0,1,1,0>': 0.13, '|1,1,0,0>': 0.05, '|1,0,0,1>': 0.02}
+2026-11-11 23:52:05 [INFO] Demo execution completed successfully.
+2026-11-11 23:52:05 [INFO] ======================================================================
+2026-11-11 23:52:05 [INFO] ----------------------------------------------------------------------
+2026-11-11 23:52:05 [INFO] Running Quantum Folding Screening on notebooks/candidate_pool_for_screening.csv (max 5)...
+2026-11-11 23:53:27 [INFO] Successfully evaluated 5 candidates.
+2026-11-11 23:53:27 [INFO] Top candidates by quantum folding stability score:
+2026-11-11 23:53:27 [INFO]   Candidate TL1A_cand_0002 (TL1A): Score=0.3421, VQE Energy=0.00, Baseline=-1.74, Gap=-1.74, Platform=sim:slos, Job ID=85af0ece-cd73-4eea-9f0e-d9b46737a3ba
+2026-11-11 23:53:27 [INFO]   Candidate TL1A_cand_0001 (TL1A): Score=0.3214, VQE Energy=0.00, Baseline=-3.04, Gap=-3.04, Platform=sim:slos, Job ID=753130f6-78e2-4245-93ef-4461213fbc1b
+2026-11-11 23:53:27 [INFO]   Candidate TL1A_cand_0005 (TL1A): Score=0.3214, VQE Energy=0.00, Baseline=-2.61, Gap=-2.61, Platform=sim:slos, Job ID=5ca9b962-369a-45f7-b3a1-31ad53b5172c
+2026-11-11 23:53:27 [INFO] ======================================================================
+2026-11-11 23:53:27 [INFO] Quandela Cloud Runner finished execution cleanly.
+2026-11-11 23:53:27 [INFO] ======================================================================
+2026-11-12 04:35:16 [INFO] ======================================================================
+2026-11-12 04:35:16 [INFO] STARTING QUANDELA CLOUD QUANTUM ENGINE RUNNER
+2026-11-12 04:35:16 [INFO] Timestamp: 2026-11-11T21:35:16.176079+00:00
+2026-11-12 04:35:16 [INFO] Platform requested: sim:slos | Mode: Cloud
+2026-11-12 04:35:16 [INFO] ======================================================================

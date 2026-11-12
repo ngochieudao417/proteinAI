@@ -7,3 +7,10 @@ weights/
 *.safetensors
 *.pt
 .venv/
+
+# Environment and sensitive keys
+.env
+.env.local
+.env.*
+!.env.example
+
