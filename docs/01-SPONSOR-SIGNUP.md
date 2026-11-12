@@ -26,17 +26,7 @@ Cái này quan trọng hơn mọi platform. Nếu chưa đăng ký thi thì mọ
 
 ## 🟠 ƯU TIÊN 1 — MatwingsVenus® 晓鹜 (quan trọng nhất)
 
-**Lý do ưu tiên:** đây là platform duy nhất đã công bố có **ESMFold2 + tính ipSAE** online — tức là đúng cái thước đo mà organizer dùng để lọc vào wet-lab. Có nó, ta tự check điểm trước khi submit thay vì đoán.
-
-- [ ] Đăng ký: https://matvenus.com/zh/sign-in
-- [ ] Điền form nhận **100.000 điểm platform**: https://awnjufzky2h.feishu.cn/share/base/form/shrcnNxWLKz1NMl9W8xjN1QaBkb
-- [ ] Điền form nhận **100 RMB token voucher**: https://awnjufzky2h.feishu.cn/share/base/shrcnD7EbHsGUQKl6DjylYmUcde
-- [ ] (tuỳ) Token platform riêng: https://token.matvenus.com/
-- [ ] Sau khi vào được, kiểm tra trong toolbox có đúng các tool này không, báo tôi:
-  - `ESMFold2` ← **tối quan trọng**
-  - `RFdiffusion`, `Rfantibody`, `BindCraft`, `BoltzGen`, `Boltz2`, `AntiBMPNN`, `ProteinMPNN`
-  - Có export được **PDB phức hợp** + **số ipSAE** ra file không?
-  - Có **API / batch** không, hay chỉ chat UI? (quyết định việc ta chạy 20 seq × N target thủ công hay script)
+**Lý do ưu tiên:** đây là platform duy nhất đã công bố có **ESMFold2 + tính ipSAE** online — tức là đúng cái thước đo mà organizer dùng để lọc vào wet-lab. Có nó, ta tự check điểm trước khi submit thay
 
 Tutorial: VHH https://mp.weixin.qq.com/s/wl-h4Av1CjpGimIh2k7McA · minibinder https://mp.weixin.qq.com/s/I1LNXzNwrEN0heBoLDMJOg · ESMFold2 https://mp.weixin.qq.com/s/5ef89061e1247218f0d0432148385a89
 
@@ -49,7 +39,7 @@ Tutorial: VHH https://mp.weixin.qq.com/s/wl-h4Av1CjpGimIh2k7McA · minibinder ht
 - [ ] Đăng ký: https://sidereus-ai.com/ (workbench: https://sidereus-ai.com/workbench)
 - [ ] **Điền form mở quyền miễn phí**: https://sidereus-ai.feishu.cn/share/base/form/shrcncNebxQyUFdRsrZZKSuhtah
 - [ ] Báo tôi: có **Protenix**, **Mol-1**, post-processing filter, MD không? Có API/agent hook không (họ nói support "codex và dsh" tức gọi được từ agent bên ngoài → **nếu có, tôi dùng được trực tiếp**)
-
+ 
 Tutorial: https://mp.weixin.qq.com/s/_Aemdfh_e8gDjyEc9GuBug · case TL1A: https://mp.weixin.qq.com/s/6629f3f0206b10b65c5f7ca3c31de966
 
 ---
